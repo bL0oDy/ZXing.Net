@@ -106,17 +106,16 @@ namespace ZXing.Datamatrix
 
             //1. step: Data encodation
             String encoded;
+            var hasGS1FormatHint = IDictionaryExtensions.IsBooleanFlagSet(hints, EncodeHintType.GS1_FORMAT);
 
             if (IDictionaryExtensions.IsBooleanFlagSet(hints, EncodeHintType.DATA_MATRIX_COMPACT))
             {
-                var hasGS1FormatHint = IDictionaryExtensions.IsBooleanFlagSet(hints, EncodeHintType.GS1_FORMAT);
-
                 encoded = MinimalEncoder.encodeHighLevel(contents, encoding, hasGS1FormatHint ? 0x1D : -1, shape);
             }
             else
             {
                 var hasForceC40Hint = IDictionaryExtensions.IsBooleanFlagSet(hints, EncodeHintType.FORCE_C40);
-                encoded = HighLevelEncoder.encodeHighLevel(contents, shape, minSize, maxSize, defaultEncodation, hasForceC40Hint, encoding, disableEci);
+                encoded = HighLevelEncoder.encodeHighLevel(contents, shape, minSize, maxSize, defaultEncodation, hasForceC40Hint, encoding, disableEci, hasGS1FormatHint);
             }
 
             SymbolInfo symbolInfo = SymbolInfo.lookup(encoded.Length, shape, minSize, maxSize, true);

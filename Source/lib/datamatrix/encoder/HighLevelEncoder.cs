@@ -26,6 +26,10 @@ namespace ZXing.Datamatrix.Encoder
     internal static class HighLevelEncoder
     {
         /// <summary>
+        /// Group Separator character
+        /// </summary>
+        public const char GS = (char)29;
+        /// <summary>
         /// Padding character
         /// </summary>
         public const char PAD = (char)129;
@@ -115,7 +119,7 @@ namespace ZXing.Datamatrix.Encoder
         /// <returns>the encoded message (the char values range from 0 to 255)</returns>
         public static String encodeHighLevel(String msg)
         {
-            return encodeHighLevel(msg, SymbolShapeHint.FORCE_NONE, null, null, Encodation.ASCII, false, null, false);
+            return encodeHighLevel(msg, SymbolShapeHint.FORCE_NONE, null, null, Encodation.ASCII, false, null, false, false);
         }
 
         /// <summary>
@@ -134,7 +138,7 @@ namespace ZXing.Datamatrix.Encoder
                                              Dimension maxSize,
                                              int defaultEncodation)
         {
-            return encodeHighLevel(msg, shape, minSize, maxSize, defaultEncodation, false, null, false);
+            return encodeHighLevel(msg, shape, minSize, maxSize, defaultEncodation, false, null, false, false);
         }
 
         /// <summary>
@@ -149,6 +153,7 @@ namespace ZXing.Datamatrix.Encoder
         /// <param name="forceC40">enforce C40 encoding</param>
         /// <param name="encoding"></param>
         /// <param name="disableEci"></param>
+        /// <param name="forceGS1"></param>
         /// <returns>the encoded message (the char values range from 0 to 255)</returns>
         public static String encodeHighLevel(String msg,
                                              SymbolShapeHint shape,
@@ -157,7 +162,8 @@ namespace ZXing.Datamatrix.Encoder
                                              int defaultEncodation,
                                              bool forceC40,
                                              Encoding encoding,
-                                             bool disableEci)
+                                             bool disableEci,
+                                             bool forceGS1)
         {
             //the codewords 0..255 are encoded as Unicode characters
             C40Encoder c40Encoder = new C40Encoder();
@@ -171,7 +177,12 @@ namespace ZXing.Datamatrix.Encoder
             context.setSymbolShape(shape);
             context.setSizeConstraints(minSize, maxSize);
 
-            if (msg.StartsWith(MACRO_05_HEADER) && msg.EndsWith(MACRO_TRAILER))
+            if (forceGS1 && msg.StartsWith(GS.ToString()))
+            {
+                context.writeCodeword(FNC1);
+                context.Pos += 1;
+            }
+            else if (msg.StartsWith(MACRO_05_HEADER) && msg.EndsWith(MACRO_TRAILER))
             {
                 context.writeCodeword(MACRO_05);
                 context.setSkipAtEnd(2);
